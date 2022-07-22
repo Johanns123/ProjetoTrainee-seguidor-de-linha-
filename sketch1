@@ -13,7 +13,7 @@ int EsqCont = 7; //Controle esquerdo
 
 int PotPrim = 60; //Potência do motor principal da curva
 int PotSec = 6; //Potênica do motor secundário durante a curva
-int PotFrente = 50; //Potência quando o robô estiver seguindo em frente
+int PotCorrec = 50; //Potência quando o robô estiver seguindo em frente
 
 //Sensores//
 int s2 = A0;
@@ -22,6 +22,7 @@ int s4 = A2;
 int s5 = A3;
 int s6 = A4;
 int s7 = A5;
+int sp = 8
 
 //Valor dos Sensores//
 int valors2 = 0;
@@ -30,6 +31,7 @@ int valors4 = 0;
 int valors5 = 0;
 int valors6 = 0;
 int valors7 = 0;
+int valorsp = 0;
 
 //Variáveis Bluetooth
 int state = 0 ;   
@@ -59,6 +61,7 @@ int main ()
   TIMSK0 = 0x01;  //habilito a interrupção do timer0
   sei();  //habilita a chave geral das interrupções
   MaxTimer1 = 500;
+  
 
 }
 
@@ -78,7 +81,8 @@ void setup (void)
   pinMode(A2 ,INPUT);
   pinMode(A3 ,INPUT);      //input dos 6 sensores frontais 
   pinMode(A4 ,INPUT);
-  pinMode(A5 ,INPUT);      //
+  pinMode(A5 ,INPUT); 
+  pinMde (8, INPUT);      //
 
    Serial.begin(9600);   // Serial para Monitor Arduino para debug
 }
@@ -99,14 +103,14 @@ void loop (void)
   digitalWrite(EsqCont, HIGH); //motor girando no sentido horário
 
   curva_direita = 
-  analogWrite(DirVel, 100); 
-  analogWrite(EsqVel, 100); 
+  analogWrite(DirVel, PotPrim); 
+  analogWrite(EsqVel, PotSec); 
   digitalWrite(DirCont, HIGH); 
   digitalWrite(EsqCont, LOW);
 
   curva_esquerda = 
-  analogWrite(DireVel, 100);
-  analogWrite(EsqVel, 100);
+  analogWrite(DireVel, PotSec);
+  analogWrite(EsqVel, PotPrim);
   digitalWrite(DirCont, LOW);
   gigitalWrite(EsqCont, HIGH);
 
@@ -131,7 +135,7 @@ void timers1 (void)
   
   if (contador1 > 500)
   {
-    rotina();
+    Sensor_Parada();
     contador1 = 0;
   }
 }
@@ -144,11 +148,9 @@ void sensores (void)
   analogWrite (A4, 0);
   analogWrite (A5, 0);
   analogWrite (A6, 0);
+  
+  walk();
  
-  if (s2 == 1 && s7 == 1) //Linha branca em pista preta
-  {
-
-  }
 }
 
 void calculo_erro (void)
@@ -247,9 +249,54 @@ void Walk (void)
   
  
 
-  if(valors2 > linha  && valors7 < linha)
+  if(valors2 > linha  && valors7 > linha)
   {
-
+    
+  analogWrite(DirVel, PotFrente); //velocidade mínima do motor equivale a 0
+  analogWrite(EsqVel, PotFrente); //velociade máxima do motor equivale a 255
+  digitalWrite(DirCont, LOW); //motor girando no sentido antihorário
+  digitalWrite(EsqCont, LOW); //motor girando no sentido antihorário
+    
+    
   }
+  
+  else if(valors2 < linha && valors3 < linha)
+  {
+    
+  analogWrite(DirVel, PotFrente); 
+  analogWrite(EsqVel, 0); 
+  digitalWrite(DirCont, HIGH); 
+  digitalWrite(EsqCont, LOW);
+ 
+ 
+  }
+  
+  else if (valors6 < linha && valors7 < linha)
+  {
+    
+  analogWrite(DireVel, PotPrim);
+  analogWrite(EsqVel, 0);
+  digitalWrite(DirCont, LOW);
+  gigitalWrite(EsqCont, HIGH);
+  
+  
+  }
+  
 }
+
+void Sensor_Parada(void)
+{
+  digitalWrite (8, 0);
+  
+  valorsp = digitalRead(8)
+  
+  if (valorsp > linha)
+  {
+    
+  }
+
+
+}
+
+
 
